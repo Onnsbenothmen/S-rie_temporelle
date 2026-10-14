@@ -1,0 +1,8 @@
+# Dashboard - interface interactive de consultation des résultats
+streamlit>=1.40
+pandas>=2.0
+plotly>=5.0
+
+# Lancement :
+#   pip install -r dashboard/requirements.txt
+#   streamlit run dashboard/app.py

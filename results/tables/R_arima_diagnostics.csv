@@ -1,0 +1,4 @@
+"Variable","LB_stat","LB_p","JB_stat","JB_p","ARCH_stat","ARCH_p","LjungBox_OK","JB_normal_OK","ARCH_absent"
+"Load",2423.2,0,104797.98,0,5071.59,0,FALSE,FALSE,FALSE
+"Wind",380.83,0,47118.13,0,4638.95,0,FALSE,FALSE,FALSE
+"Solar",1447.23,0,24411936.65,0,10342.62,0,FALSE,FALSE,FALSE

@@ -1,0 +1,4 @@
+"Variable","Modele","LB_res_12","LB_res2_12","JB_stat","JB_p"
+"Load","GARCH(1,1)",0,0,343.76,0
+"Wind","GARCH(1,1)",0,0.0102,95.13,0
+"Solar","GARCH(1,1)",0,0.7797,47.94,3.88761245417868e-11

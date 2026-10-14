@@ -1,0 +1,2 @@
+n_obs,start,end,freq,n_holes,n_duplicates,na_load,na_wind,na_solar
+50400,2015-01-01 00:00:00+00:00,2020-09-30 23:00:00+00:00,<Hour>,0,0,0,74,103

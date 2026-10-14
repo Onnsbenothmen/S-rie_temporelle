@@ -1,0 +1,10 @@
+Variable,Modele,Persistance,Demi_vie,Convergence_ok
+Load,"GARCH(1,1)",0.0,0.0,False
+Load,"GARCH(2,1)",0.8222,3.5,True
+Load,"EGARCH(1,1)",0.0,0.0,False
+Wind,"GARCH(1,1)",0.9905,72.7,True
+Wind,"GARCH(2,1)",0.9892,63.6,True
+Wind,"EGARCH(1,1)",0.9861,49.3,True
+Solar,"GARCH(1,1)",1.0,,False
+Solar,"GARCH(2,1)",1.0,,False
+Solar,"EGARCH(1,1)",0.9894,65.0,True

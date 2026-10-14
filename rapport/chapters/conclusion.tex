@@ -1,0 +1,95 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+\subsection{Bilan des résultats}
+Ce mini-projet a mis en \oe{}uvre, sur les trois séries énergétiques
+allemandes (\texttt{Load}, \texttt{Wind}, \texttt{Solar}), une chaîne complète
+d'analyse de séries temporelles, \textbf{duale R / Python}. Les principaux
+résultats sont les suivants.
+
+\begin{itemize}
+  \item \textbf{Analyse exploratoire.} Les séries présentent une saisonnalité
+        quotidienne (\(m=24\)) et hebdomadaire forte, une asymétrie marquée
+        pour \texttt{Wind}/\texttt{Solar} et une saisonnalité annuelle
+        opposée (éolien hivernal, solaire estival). Les séries brutes sont
+        non stationnaires ; la différenciation \(d=1\) les rend stationnaires
+        (ADF et KPSS concordants).
+
+  \item \textbf{ARIMA/SARIMA.} Les ordres retenus par AICc sont
+        \textbf{identiques} en R et en Python
+        (\texttt{SARIMA\_manuel} pour \texttt{Load}/\texttt{Wind},
+        \texttt{SARIMA\_auto} pour \texttt{Solar}). Les diagnostics rejettent
+        l'absence d'autocorrélation, de non-normalité et d'effet ARCH, ce
+        dernier point motivant le volet GARCH.
+
+  \item \textbf{VAR / Granger / VECM.} L'ordre \(p=14\) est retenu par AIC.
+        La causalité de Granger identifie une unique relation significative
+        \textbf{\texttt{Wind} \(\to\) \texttt{Load}}. La cointégration de
+        Johansen donne \(r=2\), et le VECM produit des vecteurs \(\beta\) et des
+        vitesses \(\alpha\) \textbf{reproductibles} entre R et Python.
+
+  \item \textbf{GARCH.} La volatilité des variations journalières est très
+        persistante (\(\approx 0{,}99\) pour \texttt{Wind}) ; \texttt{Solar}
+        est non covariation-stationnaire en GARCH(1,1)/GARCH(2,1), seul
+        l'EGARCH(1,1) restant stable. Les innovations de Student capturent les
+        queues épaisses.
+
+  \item \textbf{LSTM/GRU.} Les réseaux récurrents apportent un gain mesurable
+        à très long horizon (\(h=5\,040\) sur \texttt{Load} : RMSE \(7\,593\)
+        contre \(65\,847\) pour le SARIMA) et surpassent nettement les naïfs
+        en walk-forward un pas. À un pas, le \textbf{SARIMA} reste toutefois
+        le meilleur modèle (test de Diebold--Mariano hautement significatif),
+        ce qui conforte l'intérêt des approches hybrides.
+
+  \item \textbf{Reproductibilité.} Les deux implémentations (R et Python)
+        produisent des métriques quasi identiques (écarts \(<0{,}5\,\%\)),
+        validant la démarche de double codage.
+\end{itemize}
+
+\subsection{Limites}
+\begin{enumerate}
+  \item \textbf{Horizon long.} À \(h=5\,040\), les prévisions récursives des
+        modèles classiques divergent ; seule la comparaison
+        inter-modèles reste informative.
+  \item \textbf{MAPE et \texttt{Solar}.} La proximité de zéro (nuit) rend le
+        MAPE ininterprétable ; il doit être systématiquement complété par
+        RMSE/MAE.
+  \item \textbf{Saisonnalité tronquée.} Seul \(m=24\) est modélisé
+        explicitement ; la saisonnalité hebdomadaire (\(m=168\)) et annuelle
+        ne sont pas prises en compte par les modèles ARIMA/SARIMA, ce qui
+        limite la qualité à moyen terme.
+  \item \textbf{Ordre VAR élevé.} \(p=14\) sur \(\approx 1\,890\) jours
+        d'apprentissage peut conduire à un sur-ajustement ; les critères
+        HQ/SC suggèrent un ordre plus faible.
+  \item \textbf{Période de test COVID.} Le test débute le \(5\) mars 2020,
+        à l'entrée de la crise sanitaire : la rupture de régime affecte
+        nécessairement les performances.
+  \item \textbf{Monovariable pour le LSTM.} Les réseaux sont entraînés série
+        par série, sans exploiter l'information croisée (Wind/Solar/Load),
+        pourtant mise en évidence par le VECM.
+\end{enumerate}
+
+\subsection{Perspectives}
+\begin{enumerate}
+  \item Intégrer des \textbf{régresseurs de Fourier} (saisonnalités 24/168)
+        ou un SARIMA à \(m=168\) sur fenêtres plus courtes.
+  \item Passer à des LSTM/GRU \textbf{multivariés} (entrées conjointes des
+        trois séries) et ajouter des variables exogènes (température, vent,
+        irradiance).
+  \item Conduire le test de \textbf{Diebold--Mariano entre SARIMA et LSTM}
+        sur les trajectoires \(h>1\), et non seulement en un pas.
+  \item Étudier des modèles de volatilité multivariés (DCC-GARCH) pour la
+        dépendance conditionnelle entre séries.
+  \item Produire des \textbf{intervalles de prévision} calibrés (prévision
+        probabiliste) plutôt que des points.
+  \item Déployer l'ensemble dans un \emph{dashboard} interactif
+        (Streamlit, déjà présent dans \texttt{dashboard/}) pour la
+        vulgarisation.
+\end{enumerate}
+
+En définitive, le socle classique (ARIMA, VAR/VECM, GARCH) et son extension
+profonde (LSTM/GRU) ont été implémentés de façon cohérente et reproductible,
+et comparés rigoureusement. Les résultats confirment l'intérêt des approches
+hybrides : modèles classiques pour les horizons courts et interprétables,
+modèles profonds pour les horizons longs, l'ensemble devant être complété par
+une modélisation explicite des saisonnalités et des relations multivariées.

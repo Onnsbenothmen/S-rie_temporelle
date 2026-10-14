@@ -1,0 +1,8 @@
+Modele,Famille,Parametres_approx,Cout_calcul,Interpretabilite,RMSE_median,RMSE_min,Nb_variables
+Hybride_SARIMA_LSTM,Hybride,8700,Tres eleve,Faible,1005.6,78.7,3
+SARIMA_manuel,Econometrique,6,Faible,Elevee,1068.9,3.1,3
+SARIMA_auto,Econometrique,8,Faible,Elevee,1763.4,161.6,3
+Prophet,Decomposition,40,Moyen,Moyenne,2850.1,442.7,3
+LSTM,Deep learning,8600,Eleve,Faible,3120.0,573.8,3
+ARIMA_auto,Econometrique,8,Faible,Elevee,5179.1,3.5,3
+GRU,Deep learning,6500,Eleve,Faible,8406.2,2060.4,3

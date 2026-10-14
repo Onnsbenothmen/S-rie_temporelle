@@ -1,0 +1,192 @@
+\section{Méthodologie}
+\label{sec:methodo}
+
+\subsection{Source et description des données}
+Les données proviennent de la plateforme \textbf{ENTSO-E Transparency Platform}
+\cite{entsoe}, diffusées via le portail open-data \emph{Open Power System Data}
+(fichier brut \texttt{data/raw/time\_series\_60min\_singleindex.csv}). Après
+sélection des colonnes allemandes, conversion des horodatages en
+\texttt{DatetimeIndex} UTC, tri chronologique et dédoublonnage, le jeu
+analytique final est \texttt{data/processed/germany\_energy\_analysis.csv}.
+
+\begin{table}[H]
+\centering
+\caption{Fiche synthétique du jeu de données.}
+\label{tab:donnees}
+\begin{tabular}{ll}
+\toprule
+Champ & Valeur \\
+\midrule
+Thématique & Énergie / Environnement --- Allemagne \\
+Source & ENTSO-E Transparency Platform \\
+Fréquence & Horaire (60 min), horodatage UTC \\
+Période & 2015-01-01 00:00 $\rightarrow$ 2020-09-30 23:00 \\
+Nombre d'observations & \(50\,400\) \\
+Trous / doublons & \(0\) \\
+Valeurs manquantes & \texttt{Load} : 0 ; \texttt{Wind} : 74 ; \texttt{Solar} : 103 \\
+Variables retenues & \texttt{Load}, \texttt{Wind}, \texttt{Solar} (MW) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Variables retenues.}
+\texttt{Load} est la consommation électrique nationale (variable endogène
+principale) ; \texttt{Wind} et \texttt{Solar} sont les productions éolienne et
+photovoltaïque. Le triplet consommation + deux renouvelables constitue un
+système multidimensionnel cohérent, justifiant le volet VAR/VECM.
+
+\paragraph{Contrôles qualité.}
+L'index horaire attendu (\texttt{date\_range} de fréquence horaire) coïncide
+exactement avec les horodatages présents : aucun trou, aucun doublon. Les
+valeurs manquantes sont rares et isolées (74 pour \texttt{Wind}, 103 pour
+\texttt{Solar}) ; elles sont \textbf{conservées} dans le fichier analytique
+afin de ne pas fausser l'exploration, puis imputées juste avant la
+modélisation.
+
+\subsection{Prétraitement et imputation}
+La construction de l'objet série temporelle natif diffère légèrement entre R
+et Python : côté R, on utilise \texttt{ts(..., frequency = 24)} (cycle
+quotidien) ; côté Python, un \texttt{DataFrame} pandas à \texttt{DatetimeIndex}
+UTC avec fréquence déclarée \texttt{h}. L'imputation suit une approche
+heure-saisonnière identique entre les deux langages : médiane par heure de la
+journée, complétée par une interpolation linéaire
+(\texttt{forecast::na.interp} en R). Ce choix préserve la régularité horaire
+indispensable aux modèles saisonniers (\(m=24\)), contrairement à une
+suppression de lignes qui briserait le pas de temps.
+
+\subsection{Découpage chronologique}
+Le découpage est \textbf{strictement chronologique} \(90\,\%\) / \(10\,\%\)
+(jamais aléatoire, pour éviter toute fuite d'information future) :
+\(45\,360\) heures d'apprentissage et \(5\,040\) heures de test. Le jeu de test
+débute le \textbf{5 mars 2020} et inclut donc l'entrée dans la crise sanitaire
+COVID-19, ce qui constitue un point d'interprétation important. Quatre
+horizons sont évalués : \(h \in \{5,\,10,\,24,\,5\,040\}\) heures (\(5\) et
+\(10\) pour le court terme, \(24\) pour le cycle journalier, \(5\,040\) pour la
+trajectoire complète sur tout le jeu de test).
+
+\subsection{Analyse exploratoire (EDA)}
+L'EDA comprend : (i) l'évolution temporelle des trois séries sur toute la
+période ; (ii) les profils moyens horaire, hebdomadaire, mensuel et annuel ;
+(iii) la cartographie des valeurs manquantes ; (iv) la détection d'observations
+atypiques (règle IQR globale et MAD roulante sur \(24\)~h) ; (v) les
+corrélogrammes ACF/PACF (séries brutes et différenciées) ; (vi) une
+décomposition STL (tendance / saisonnalité / résidus) pour la charge.
+
+\subsection{Stationnarité et ordres d'intégration}
+La stationnarité est testée par le test \textbf{ADF} (H0 : racine unitaire) et
+le test \textbf{KPSS} (H0 : stationnarité), sur les séries brutes, en
+différence première (\(d=1\)) et en différence saisonnière (\(d=24\)). La
+conclusion retenue exige l'accord des deux tests.
+
+\subsection{Modèles univariés : ARIMA et SARIMA}
+Pour chaque série, trois candidats sont comparés par critère d'information
+(AIC/AICc/BIC) :
+\begin{enumerate}
+  \item \textbf{SARIMA\_manuel} : \(\text{ARIMA}(1,1,1)(1,1,1)_{24}\), motivé
+        par les corrélogrammes de l'EDA (rebonds à 24 et 168) ;
+  \item \textbf{ARIMA\_auto} : \texttt{auto.arima} non saisonnier (\(d=1\)) ;
+  \item \textbf{SARIMA\_auto} : \texttt{auto.arima} saisonnier borné à
+        \(m=24\).
+\end{enumerate}
+Le modèle retenu est celui qui minimise l'\textbf{AICc}. Les résidus sont
+diagnostiqués par le test de \textbf{Ljung--Box} (autocorrélation, retard 24),
+le test de \textbf{Jarque--Bera} (normalité) et un test \textbf{ARCH--LM}
+(12 retards) implémenté manuellement. Les prévisions sont produites aux
+horizons \(h=5\), \(10\), \(24\) et \(5\,040\) avec les métriques MSE, RMSE,
+MAE et MAPE (ce dernier calculé sans division par zéro, \texttt{Solar} étant
+nulle la nuit).
+
+\paragraph{Intervalles de prévision.}
+Pour le modèle retenu, les \textbf{intervalles de prévision} à \(95\,\%\)
+sont calculés aux horizons \(h=5,\,10,\,24\) (c'est-à-dire dans les plages où
+la spécification reste valide, contrairement à \(h=5\,040\) où la bande
+diverge). Ils sont obtenus via \texttt{pmdarima} pour les spécifications
+saisonnières : le mode \texttt{low\_memory} de \texttt{statsmodels},
+nécessaire pour ajuster un SARIMA saisonnier sur \(45\,360\) points sans
+saturer la mémoire, n'expose pas la covariance de prévision.
+
+\subsection{Modèles multivariés : VAR, Granger, Johansen, VECM}
+Les liaisons structurelles entre consommation et productions s'expriment à
+l'échelle \textbf{journalière} : les séries sont donc agrégées en moyennes
+quotidiennes (\(\approx 2\,100\) jours). Pour chaque série univariée, le test
+ADF justifie la différenciation \(D1\), puis :
+\begin{itemize}
+  \item l'ordre \(p\) du \textbf{VAR} est sélectionné par critère d'information
+        (AIC/HQ/SC/FPE, \texttt{lag.max}=15) ;
+  \item la \textbf{causalité de Granger} est testée en paires pour les six
+        relations ordonnées (H0 : \(X\) ne cause pas \(Y\) au sens de Granger) ;
+  \item la \textbf{cointégration de Johansen} (test de trace) est menée sur
+        les niveaux pour déterminer le rang \(r\) ; si \(r\geq 1\), un
+        \textbf{VECM} est estimé (vecteurs \(\beta\) normalisés et vitesses
+        d'ajustement \(\alpha\)) ;
+  \item les dynamiques sont synthétisées par les \textbf{fonctions de réponse
+        impulsionnelle} (IRF, choc \texttt{Wind}/\texttt{Solar} sur
+        \texttt{Load}, 28 jours) et la \textbf{décomposition de la variance}
+        (FEVD).
+\end{itemize}
+
+\subsection{Modélisation de la volatilité : ARCH / GARCH}
+Les tests ARCH--LM ayant rejeté l'absence d'effet ARCH, la variance
+conditionnelle des variations journalières est modélisée par trois
+spécifications comparées, avec innovations de Student (queues épaisses) :
+\textbf{GARCH(1,1)}, \textbf{GARCH(2,1)} et \textbf{EGARCH(1,1)}. La
+\textbf{persistance} est définie comme la somme de tous les coefficients ARCH
+et GARCH pour un sGARCH (respectivement \(\beta_1\) pour un eGARCH) ; la
+demi-vie de la volatilité est \(\log(0{,}5)/\log(\text{persistance})\)
+lorsque la persistance est strictement comprise entre 0 et 1.
+
+\subsection{Modèles profonds : LSTM et GRU}
+En Python (Keras/TensorFlow), des réseaux récurrents \textbf{LSTM} et
+\textbf{GRU} sont entraînés séparément avec : fenêtre glissante de
+\(168\)~h (\(=1\) semaine), normalisation \emph{MinMax ajustée sur le seul
+train}, validation chronologique de \(5\,040\)~h, \textbf{couche de Dropout}
+(\(p=0{,}2\)) entre l'état récurrent et la sortie pour limiter le
+surapprentissage, et prévision récursive multi-pas. Les deux architectures
+sont évaluées et la meilleure (sur la \texttt{val\_loss}) est conservée par
+série ; l'évaluation est menée à un pas en \emph{walk-forward} et sous forme
+de trajectoires aux horizons \(h=5/10/24/5040\).
+
+\paragraph{Validation croisée temporelle (TSCV).}
+En complément du simple hold-out, une \textbf{validation croisée à fenêtre
+expansive} (\(k=3\) plis) est appliquée aux réseaux : le train grandit
+progressivement, la validation reste toujours postérieure au train, ce qui
+fournit une estimation de la RMSE plus robuste et sans fuite temporelle.
+
+\subsection{Intervalles de prévision}
+Les intervalles à \(95\,\%\) sont produits pour le modèle retenu à
+\(h=5,\,10,\,24\) (SARIMA via \texttt{pmdarima}) et pour Prophet
+(nativement, bande \texttt{yhat\_lower}/\texttt{yhat\_upper}). Les modèles
+profonds et l'hybride fournissent une prévision ponctuelle ; l'incertitude y
+est appréhendée par la dispersion des erreurs walk-forward.
+
+\subsection{Modèles additionnels : Prophet et hybride SARIMA+LSTM}
+Deux modèles complémentaires confrontent les approches classiques et
+profondes :
+\begin{itemize}
+  \item \textbf{Prophet} (Meta) : décomposition automatique en tendance
+        linéaire par morceaux, saisonnalités quotidienne / hebdomadaire /
+        annuelle et jours fériés, robuste aux valeurs manquantes ;
+  \item \textbf{hybride SARIMA\,$+$\,LSTM} : la composante \emph{linéaire}
+        est captée par le SARIMA retenu, dont les résidus (supposés porter la
+        structure non linéaire) alimentent un LSTM ; la prévision hybride est
+        la somme des deux, méthode classique d'hybridation
+        tendance\,/\,résidu.
+\end{itemize}
+
+
+\subsection{Évaluation comparative}
+Les métriques sont MSE, RMSE, MAE et MAPE. Deux protocoles sont distingués :
+(i) des \textbf{trajectoires} émises depuis une origine unique aux horizons
+\(h=5/10/24/5040\) ; (ii) un \textbf{walk-forward 1 pas} sur les \(5\,040\)~h
+de test (origine glissante), où chaque prévision n'utilise que l'information
+passée. Le walk-forward confronte les baselines \emph{naïve} et
+\emph{saisonnière-naïve} (\(24\)~h) au SARIMA retenu, au LSTM et au GRU.
+
+Les comparaisons par paires utilisent le test de \textbf{Diebold--Mariano}
+sur les erreurs quadratiques, appliqué à \textbf{toutes les paires} de
+modèles d'une même série, avec correction \textbf{HLN}
+(Harvey--Leybourne--Newbold) et variance \textbf{HAC} (Newey--West, retard
+\(h-1\)). Enfin, un \textbf{tableau de comparaison} enrichi associe aux
+performances la \emph{complexité} (nombre de paramètres), le \emph{coût de
+calcul} et l'\emph{interprétabilité} de chaque famille de modèles, comme
+demandé au cahier des charges.

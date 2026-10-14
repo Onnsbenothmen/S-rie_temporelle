@@ -1,0 +1,112 @@
+---
+title: "Mini-projet Séries Temporelles - Analyse complète (R)"
+subtitle: "Énergie en Allemagne (ENTSO-E) : Load, Wind, Solar - 2015-01-01 → 2020-09-30"
+author: "Data Science & IA"
+date: "Rendu 12/10/2026"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      cache = FALSE, tidy = FALSE)
+# NOTE : le tricotage des scripts 04 (ARIMA) et 05 (VAR/VECM) prend
+# 8 a 15 minutes sur un poste de travail standard (trek 45k points).
+```
+
+# Introduction
+
+Ce document exécute, **étape par étape**, l'ensemble de la partie R du socle
+classique. Chaque script est sourcé dans son bloc : toutes les sorties sont
+écrites automatiquement dans `results/tables/` et `results/figures/`.
+
+Le *pendant Python* (données + EDA) est fourni par `notebooks/analyse_complete.ipynb`,
+conforme au cahier des charges (socle classique exigé en R **et** en Python).
+
+# 1. Préparation des données
+
+```{r 01-data-preparation}
+source("R/01_data_preparation.R", echo = TRUE)       
+```
+
+Après lecture du brut ENTSO-E, sélection des colonnes allemandes, nettoyage
+des timestamps et analyse des blocs de valeurs manquantes, deux fichiers sont
+produits :
+
+1. `data/processed/germany_energy_timeseries.csv` : données nettoyées complètes ;
+2. `data/processed/germany_energy_analysis.csv` : version **2015+** utilisée par
+   toute la modélisation (50 400 observations, horaire UTC).
+
+# 2. Analyse exploratoire (EDA)
+
+```{r 02-eda}
+source("R/02_EDA.R", echo = TRUE)
+```
+
+L'EDA confirme une **double saisonnalité** de la consommation :
+quotidienne (cycle 24 h) et hebdomadaire (cycle 168 h, ACF à 168 > 0.9).
+Wind et Solar présentent des heures manquantes isolées (conservées ici,
+interpolées au moment de la modélisation).
+
+# 3. Diagnostics de stationnarité
+
+```{r 03-diagnostics}
+source("R/03_diagnostics.R", echo = TRUE)
+```
+
+ADF + KPSS sur les brutes puis sur les différences : la différenciation
+simple (D1) rend les trois séries stationnaires → `I(1)` pour la suite.
+
+# 4. Modélisation ARIMA / SARIMA (section 3.1 du cahier des charges)
+
+```{r 04-arima-sarima}
+source("R/04_ARIMA_SARIMA.R", echo = TRUE)
+```
+
+Trois modèles comparés par série (SARIMA manuel issu de l'ACF/PACF, ARIMA et
+SARIMA via `auto.arima`, `m = 24`), sélection par AICc, puis **diagnostic des
+résidus** : Ljung-Box, Jarque-Bera, test ARCH-LM. Les prévisions sont évaluées
+à **h = 10, h = 24** (dominante, le cahier des charges impose 5 à 10 pas) et
+`h = 5040` (documentation de la divergence multi-pas des SARIMA).
+
+# 5. Liaisons dynamiques : VAR, Granger, cointégration (section 3.2)
+
+```{r 05-var-vecm}
+source("R/05_VAR_VECM.R", echo = TRUE)
+```
+
+Analyse sur **moyennes journalières** (les liaisons structurelles vent/solaire
+→ demande s'expriment à cette échelle) : ordre libre du VAR par critère
+(AIC/HQ/SC), tests de Granger pairwise, cointégration de Johansen (trace),
+estimation d'un VECM (`r = 2`) et fonctions de réponse impulsionnelle +
+décomposition de la variance de Load.
+
+# 6. Volatilité : modèles ARCH / GARCH (section 3.3)
+
+```{r 06-garch}
+source("R/06_GARCH.R", echo = TRUE)
+```
+
+Les diagnostics des sections précédentes rejettent « pas d'effet ARCH » :
+un GARCH est donc justifié par les données. ARMA(1,0)-GARCH(1,1), GARCH(2,1)
+et EGARCH(1,1) sont estimés sur les variations journalières (innovations en
+*Student*, queues lourdes), avec persistance de la volatilité et épisodes
+extrêmes localisés dans le temps.
+
+# Conclusion & prochaines étapes
+
+La partie R du socle classique est complète :
+
+| Section | Script | Sorties principales |
+|---|---|---|
+| 3.1 | `R/04_ARIMA_SARIMA.R` | `R_arima_model_comparison.csv`, `R_arima_metrics.csv`, `R_arima_diagnostics.csv` |
+| 3.2 | `R/05_VAR_VECM.R` | `R_granger.csv`, `R_johansen.csv`, `R_vecm.csv`, `R_var_fevd.csv` |
+| 3.3 | `R/06_GARCH.R` | `R_garch_coefficients.csv`, `R_garch_diagnostics.csv` |
+
+Les transpositions Python (sections 3.1-3.3) puis LSTM/GRU (section 4)
+complèteront le comparatif multi-langage exigé.

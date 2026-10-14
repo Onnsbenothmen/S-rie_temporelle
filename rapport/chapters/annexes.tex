@@ -1,0 +1,323 @@
+\section{Annexes}
+
+\subsection{Structure du projet et reproductibilité}
+L'ensemble du travail est contenu dans le dépôt
+\texttt{TimeSeries\_Project} :
+\begin{itemize}
+  \item \texttt{R/} : six scripts séquentiels ---
+        \texttt{01\_data\_preparation.R}, \texttt{02\_EDA.R},
+        \texttt{03\_diagnostics.R}, \texttt{04\_ARIMA\_SARIMA.R},
+        \texttt{05\_VAR\_VECM.R}, \texttt{06\_GARCH.R} ;
+  \item \texttt{Python/} : transposition
+        (\texttt{arima\_var.py}, \texttt{arima\_intervals.py},
+        \texttt{garch.py}, \texttt{lstm\_gru.py},
+        \texttt{prophet\_model.py}, \texttt{hybrid\_arima\_lstm.py},
+        \texttt{evaluation.py}) ;
+  \item \texttt{data/processed/} : données préparées ;
+  \item \texttt{results/tables/}, \texttt{results/figures/},
+        \texttt{results/forecasts/}, \texttt{results/models/} : sorties
+        (préfixes \texttt{R\_} et \texttt{py\_}) ;
+  \item \texttt{rapport/} : le présent rapport \LaTeX{} ;
+  \item \texttt{dashboard/} : prototype Streamlit ;
+  \item \texttt{notebooks/} : \texttt{analyse\_complete.Rmd} et
+        \texttt{analyse\_complete.ipynb} (EDA) ;
+  \item \texttt{notebooks/analyse\_complete\_full.ipynb} : notebook
+        \textbf{bout-en-bout} couvrant les dix étapes du pipeline (données,
+        EDA, stationnarité, ARIMA/SARIMA, GARCH, VAR/VECM, LSTM/GRU, Prophet
+        et hybride, évaluation, volet IA).
+\end{itemize}
+Toutes les métriques et figures du rapport sont régénérables en exécutant les
+scripts dans l'ordre (voir le \texttt{README.md} de la racine).
+
+\subsection{Tableaux de synthèse complémentaires}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques descriptives (version R).
+Source : \texttt{descriptive\_statistics.csv}.}
+\label{tab:desc_r}
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Variable & $n$ & NA & Moyenne & Médiane & Min & Max \\
+\midrule
+\texttt{Load}  & 50\,400 & 0 & 55\,492{,}5 & 55\,092 & 31\,307 & 77\,549 \\
+\texttt{Wind}  & 50\,326 & 74 & 11\,552{,}2 & 9\,015 & 135 & 46\,064 \\
+\texttt{Solar} & 50\,297 & 103 & 4\,566{,}0 & 173 & 0 & 32\,947 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+{\small
+\begin{longtable}{lrrr}
+\caption{Profil horaire moyen (MW). Source : \texttt{hourly\_summary.csv}.}
+\label{tab:hourly}\\
+\toprule
+Heure & \texttt{Load} & \texttt{Wind} & \texttt{Solar} \\
+\midrule
+\endfirsthead
+\toprule
+Heure & \texttt{Load} & \texttt{Wind} & \texttt{Solar} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+0 & 43\,882 & 11\,884 & 0{,}01 \\
+1 & 43\,553 & 11\,737 & 0{,}01 \\
+2 & 44\,134 & 11\,640 & 0{,}31 \\
+3 & 45\,950 & 11\,589 & 41{,}67 \\
+4 & 50\,132 & 11\,537 & 426{,}92 \\
+5 & 55\,042 & 11\,337 & 1\,688{,}08 \\
+6 & 58\,898 & 10\,927 & 4\,081{,}74 \\
+7 & 60\,921 & 10\,670 & 7\,253{,}83 \\
+8 & 62\,353 & 10\,676 & 10\,471{,}87 \\
+9 & 63\,641 & 10\,914 & 12\,925{,}39 \\
+10 & 63\,734 & 11\,171 & 14\,278{,}53 \\
+11 & 62\,801 & 11\,359 & 14\,482{,}78 \\
+12 & 61\,518 & 11\,451 & 13\,595{,}15 \\
+13 & 60\,384 & 11\,494 & 11\,661{,}40 \\
+14 & 59\,499 & 11\,515 & 8\,850{,}42 \\
+15 & 59\,599 & 11\,556 & 5\,666{,}05 \\
+16 & 60\,663 & 11\,588 & 2\,868{,}91 \\
+17 & 60\,975 & 11\,635 & 1\,039{,}00 \\
+18 & 59\,545 & 11\,783 & 226{,}68 \\
+19 & 56\,794 & 12\,080 & 12{,}27 \\
+20 & 54\,040 & 12\,258 & 0{,}87 \\
+21 & 50\,916 & 12\,240 & 0{,}86 \\
+22 & 47\,596 & 12\,178 & 0{,}01 \\
+23 & 45\,251 & 12\,037 & 0{,}01 \\
+\end{longtable}
+}
+
+\begin{table}[H]
+\centering
+\caption{Profil hebdomadaire moyen (MW). Source : \texttt{weekly\_summary.csv}.}
+\label{tab:weekly}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrr}
+\toprule
+Jour & \texttt{Load} & \texttt{Wind} & \texttt{Solar} \\
+\midrule
+Lundi     & 57\,523 & 11\,492 & 4\,557 \\
+Mardi     & 59\,241 & 11\,737 & 4\,513 \\
+Mercredi  & 59\,455 & 11\,672 & 4\,665 \\
+Jeudi     & 58\,964 & 11\,337 & 4\,575 \\
+Vendredi  & 57\,742 & 10\,957 & 4\,561 \\
+Samedi    & 49\,619 & 11\,777 & 4\,517 \\
+Dimanche  & 45\,902 & 11\,892 & 4\,575 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Profil mensuel moyen (MW). Source : \texttt{monthly\_summary.csv}.}
+\label{tab:monthly}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrr}
+\toprule
+Mois & \texttt{Load} & \texttt{Wind} & \texttt{Solar} \\
+\midrule
+Janvier   & 59\,446 & 16\,029 & 1\,029 \\
+Février   & 59\,975 & 15\,656 & 2\,397 \\
+Mars      & 57\,606 & 14\,185 & 4\,114 \\
+Avril     & 53\,209 & 10\,571 & 6\,552 \\
+Mai       & 52\,285 & 8\,964 & 7\,039 \\
+Juin      & 53\,111 & 7\,704 & 7\,461 \\
+Juillet   & 53\,453 & 7\,608 & 7\,378 \\
+Août      & 52\,566 & 7\,340 & 6\,683 \\
+Septembre & 53\,705 & 9\,134 & 5\,270 \\
+Octobre   & 55\,621 & 11\,911 & 2\,947 \\
+Novembre  & 59\,232 & 13\,593 & 1\,446 \\
+Décembre  & 56\,849 & 17\,515 & 967 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Évolution annuelle moyenne (MW). Source : \texttt{yearly\_summary.csv}.}
+\label{tab:yearly}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Année & \texttt{Load} & \texttt{Wind} & \texttt{Solar} \\
+\midrule
+2015 & 54\,737 & 8\,810 & 3\,986 \\
+2016 & 55\,441 & 8\,718 & 3\,946 \\
+2017 & 56\,178 & 11\,720 & 4\,096 \\
+2018 & 56\,952 & 12\,393 & 4\,707 \\
+2019 & 55\,990 & 14\,133 & 4\,785 \\
+2020 & 53\,048 & 14\,178 & 6\,304 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+{\small
+\begin{longtable}{lllrrrr}
+\caption{Métriques ARIMA/SARIMA (Python) --- confirmation des valeurs R.
+Source : \texttt{py\_arima\_metrics.csv}.}
+\label{tab:arima_metrics_py}\\
+\toprule
+Variable & Modèle & $h$ & MSE & RMSE & MAE & MAPE (\%) \\
+\midrule
+\endfirsthead
+\toprule
+Variable & Modèle & $h$ & MSE & RMSE & MAE & MAPE (\%) \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\texttt{Load} & SARIMA\_manuel & 10 & 807\,890 & 898{,}8 & 746{,}2 & 1{,}39 \\
+\texttt{Load} & SARIMA\_manuel & 24 & 1\,143\,498 & 1\,069{,}3 & 874{,}3 & 1{,}48 \\
+\texttt{Load} & SARIMA\_manuel & 5040 & 4{,}34e9 & 65\,852 & 59\,496 & 121{,}82 \\
+\texttt{Load} & ARIMA\_auto & 10 & 15\,304\,905 & 3\,912{,}1 & 3\,603{,}4 & 5{,}96 \\
+\texttt{Load} & ARIMA\_auto & 24 & 26\,822\,868 & 5\,179{,}1 & 4\,634{,}8 & 7{,}28 \\
+\texttt{Load} & ARIMA\_auto & 5040 & 1{,}76e8 & 13\,269 & 10\,794 & 24{,}56 \\
+\texttt{Load} & SARIMA\_auto & 10 & 3\,574\,605 & 1\,890{,}7 & 1\,876{,}3 & 3{,}23 \\
+\texttt{Load} & SARIMA\_auto & 24 & 2\,819\,949 & 1\,679{,}3 & 1\,463{,}3 & 2{,}41 \\
+\texttt{Load} & SARIMA\_auto & 5040 & 4{,}18e10 & 204\,474 & 179\,830 & 365{,}40 \\
+\texttt{Wind} & SARIMA\_manuel & 10 & 1\,080\,974 & 1\,039{,}7 & 947{,}1 & 15{,}05 \\
+\texttt{Wind} & SARIMA\_manuel & 24 & 1{,}60e8 & 12\,662 & 9\,065 & 46{,}35 \\
+\texttt{Wind} & SARIMA\_manuel & 5040 & 3{,}48e10 & 186\,502 & 163\,653 & 3\,573{,}45 \\
+\texttt{Wind} & ARIMA\_auto & 10 & 265\,840 & 515{,}6 & 458{,}3 & 7{,}41 \\
+\texttt{Wind} & ARIMA\_auto & 24 & 1{,}40e8 & 11\,828 & 8\,043 & 37{,}53 \\
+\texttt{Wind} & ARIMA\_auto & 5040 & 9{,}17e7 & 9\,574 & 6\,777 & 91{,}81 \\
+\texttt{Wind} & SARIMA\_auto & 10 & 528\,854 & 727{,}2 & 570{,}9 & 8{,}82 \\
+\texttt{Wind} & SARIMA\_auto & 24 & 1{,}70e8 & 13\,021 & 9\,029 & 43{,}44 \\
+\texttt{Wind} & SARIMA\_auto & 5040 & 1{,}20e8 & 10\,964 & 7\,703 & 71{,}79 \\
+\texttt{Solar} & SARIMA\_manuel & 10 & 601\,922 & 775{,}8 & 446{,}9 & 38{,}97 \\
+\texttt{Solar} & SARIMA\_manuel & 24 & 596\,582 & 772{,}4 & 472{,}5 & 39{,}64 \\
+\texttt{Solar} & SARIMA\_manuel & 5040 & 5{,}37e7 & 7\,330 & 4\,656 & 373{,}74 \\
+\texttt{Solar} & ARIMA\_auto & 10 & 23\,254\,924 & 4\,822{,}3 & 2\,570{,}5 & 90{,}50 \\
+\texttt{Solar} & ARIMA\_auto & 24 & 31\,937\,475 & 5\,651{,}3 & 3\,221{,}8 & 96{,}16 \\
+\texttt{Solar} & ARIMA\_auto & 5040 & 1{,}44e8 & 12\,020 & 7\,606 & 101{,}04 \\
+\texttt{Solar} & SARIMA\_auto & 10 & 305\,269 & 552{,}5 & 381{,}1 & 558{,}32 \\
+\texttt{Solar} & SARIMA\_auto & 24 & 700\,494 & 837{,}0 & 585{,}5 & 1\,428{,}24 \\
+\texttt{Solar} & SARIMA\_auto & 5040 & 5{,}97e7 & 7\,727 & 6\,373 & 24\,073{,}80 \\
+\end{longtable}
+}
+
+\subsection{Inventaire des figures}
+Toutes les figures sont dans \texttt{results/figures/}. Le
+tableau~\ref{tab:fig_inventory} en donne l'inventaire complet.
+
+{\small
+\begin{longtable}{lll}
+\caption{Inventaire des figures du projet.}
+\label{tab:fig_inventory}\\
+\toprule
+Fichier & Script & Contenu \\
+\midrule
+\endfirsthead
+\toprule
+Fichier & Script & Contenu \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\texttt{Load\_time\_series.png} & R 02 & Série temporelle de la charge \\
+\texttt{Wind\_time\_series.png} & R 02 & Série temporelle éolienne \\
+\texttt{Solar\_time\_series.png} & R 02 & Série temporelle solaire \\
+\texttt{hourly\_profiles.png} & R 02 & Profil horaire moyen \\
+\texttt{weekly\_profiles.png} & R 02 & Profil hebdomadaire moyen \\
+\texttt{monthly\_profiles.png} & R 02 & Profil mensuel moyen \\
+\texttt{yearly\_profiles.png} & R 02 & Évolution annuelle \\
+\texttt{missing\_values.png} & R 02 & Valeurs manquantes (R) \\
+\texttt{R\_acf\_pacf\_Load\_raw.png} & R 03 & ACF/PACF Load brute \\
+\texttt{R\_acf\_pacf\_Load\_d1.png} & R 03 & ACF/PACF Load $d1$ \\
+\texttt{R\_acf\_pacf\_Wind\_raw.png} & R 03 & ACF/PACF Wind brute \\
+\texttt{R\_acf\_pacf\_Wind\_d1.png} & R 03 & ACF/PACF Wind $d1$ \\
+\texttt{R\_acf\_pacf\_Solar\_raw.png} & R 03 & ACF/PACF Solar brute \\
+\texttt{R\_acf\_pacf\_Solar\_d1.png} & R 03 & ACF/PACF Solar $d1$ \\
+\texttt{R\_resid\_\{Load,Wind,Solar\}.png} & R 04 & Diagnostics résidus \\
+\texttt{R\_prev\_\{Load,Wind,Solar\}.png} & R 04 & Prévisions $h=24$ \\
+\texttt{R\_var\_irf\_load.png} & R 05 & Réponse impulsionnelle Load \\
+\texttt{R\_var\_fevd\_load.png} & R 05 & Décomposition variance Load \\
+\texttt{R\_garch\_\{Load,Wind,Solar\}.png} & R 06 & Volatilité conditionnelle \\
+\texttt{py\_ts\_overview.png} & py & Vue d'ensemble \\
+\texttt{py\_seasonal\_profiles.png} & py & Profils saisonniers \\
+\texttt{py\_stl\_load\_daily.png} & py & STL journalier Load \\
+\texttt{py\_stl\_load\_weekly.png} & py & STL hebdomadaire Load \\
+\texttt{py\_missing.png} & py & Valeurs manquantes \\
+\texttt{py\_outliers\_load.png} & py & Outliers Load \\
+\texttt{py\_acf\_pacf\_Load\_raw.png} & py & ACF/PACF Load brute \\
+\texttt{py\_acf\_pacf\_Load\_d1.png} & py & ACF/PACF Load $d1$ \\
+\texttt{py\_acf\_pacf\_Load\_d24.png} & py & ACF/PACF Load $d24$ \\
+\texttt{py\_acf\_pacf\_Wind\_raw.png} & py & ACF/PACF Wind brute \\
+\texttt{py\_acf\_pacf\_Solar\_raw.png} & py & ACF/PACF Solar brute \\
+\texttt{py\_resid\_\{Load,Wind,Solar\}.png} & py & Diagnostics résidus \\
+\texttt{py\_prev\_\{Load,Wind,Solar\}.png} & py & Prévisions \\
+\texttt{py\_var\_irf\_load.png} & py & Réponse impulsionnelle Load \\
+\texttt{py\_var\_fevd\_load.png} & py & Décomposition variance Load \\
+\texttt{py\_garch\_\{Load,Wind,Solar\}.png} & py & Volatilité conditionnelle \\
+\texttt{py\_lstm\_gru\_forecast\_\{...\}.png} & py & Prévisions LSTM/GRU \\
+\texttt{py\_lstm\_gru\_loss\_\{...\}.png} & py & Courbes de loss \\
+\texttt{py\_evaluation\_rmse.png} & py & RMSE comparés \\
+\end{longtable}
+}
+
+\subsection{Inventaire des tableaux}
+Les \(47\) fichiers CSV de \texttt{results/tables/} se répartissent en :
+\begin{itemize}
+  \item \textbf{Données/EDA} : \texttt{descriptive\_statistics.csv},
+        \texttt{descriptive\_statistics\_py.csv}, \texttt{energy\_means.csv},
+        \texttt{hourly\_summary.csv}, \texttt{weekly\_summary.csv},
+        \texttt{monthly\_summary.csv}, \texttt{yearly\_summary.csv},
+        \texttt{profiles\_\{hour,month,week,year\}\_py.csv},
+        \texttt{missing\_values.csv}, \texttt{missing\_dates.csv},
+        \texttt{outliers\_summary.csv}, \texttt{data\_overview\_summary.csv},
+        \texttt{stationarity\_tests.csv}, \texttt{R\_stationarity\_tests.csv} ;
+  \item \textbf{ARIMA/SARIMA} :
+        \texttt{\{R,py\}\_arima\_model\_comparison.csv},
+        \texttt{\{R,py\}\_arima\_diagnostics.csv},
+        \texttt{\{R,py\}\_arima\_metrics.csv} ;
+  \item \textbf{VAR/VECM} :
+        \texttt{\{R,py\}\_var\_order.csv}, \texttt{\{R,py\}\_granger.csv},
+        \texttt{\{R,py\}\_johansen.csv}, \texttt{\{R,py\}\_vecm.csv},
+        \texttt{\{R,py\}\_vecm\_alpha.csv}, \texttt{\{R,py\}\_var\_diagnostics.csv},
+        \texttt{\{R,py\}\_var\_fevd.csv} ;
+  \item \textbf{GARCH} :
+        \texttt{\{R,py\}\_garch\_coefficients.csv},
+        \texttt{\{R,py\}\_garch\_persistence.csv},
+        \texttt{\{R,py\}\_garch\_diagnostics.csv} ;
+  \item \textbf{LSTM/GRU et évaluation} :
+        \texttt{py\_lstm\_gru\_metrics.csv},
+        \texttt{py\_lstm\_gru\_cv.csv},
+        \texttt{py\_evaluation\_ranking.csv},
+        \texttt{py\_walkforward\_metrics.csv},
+        \texttt{py\_diebold\_mariano.csv},
+        \texttt{py\_model\_comparison.csv} ;
+  \item \textbf{Prévisions} : \texttt{results/forecasts/}
+        \texttt{py\_walkforward\_\{Load,Wind,Solar\}.csv}.
+\end{itemize}
+
+\subsection{Volet IA générative}
+Le volet « analyse assistée par IA » a été conduit selon un
+\textbf{protocole manuel, sans clé API} (documenté dans
+\texttt{results/llm/README.md}) : génération de résumés factuels depuis les
+tables CSV, interrogation hors ligne d'un assistant, puis archivage des
+échanges. Trois échanges sont archivés dans
+\texttt{results/llm/echanges/} :
+
+\begin{itemize}
+  \item \texttt{2026-10-11\_analyse\_sarima\_lstm.md} : hiérarchie
+        SARIMA vs LSTM à court et long terme ;
+  \item \texttt{2026-10-12\_interpretation\_var\_vecm\_garch.md} : lecture de
+        l'ordre VAR, de la causalité de Granger (Wind$\to$Load,
+        $p=0{,}0022$), de la cointégration ($r=2$) et de la persistance
+        GARCH (Wind $0{,}9905$, demi-vie $72{,}7$~h) ;
+  \item \texttt{2026-10-12\_hierarchie\_modeles\_recommandations.md} :
+        hiérarchie par horizon, opposition walk-forward 1 pas
+        \emph{vs} trajectoire depuis une origine fixe, recommandations.
+\end{itemize}
+
+Conformément aux contraintes anti-hallucination, chaque réponse a été
+\textbf{relue critiquement} (sections « Relecture critique » des fichiers) :
+les chiffres proviennent exclusivement de \texttt{results/tables/}, les
+affirmations non vérifiables ont été rejetées, et des éléments absents de la
+réponse du modèle (par ex.\ le biais COVID de la période de test) ont été
+ajoutés par l'étudiant. \textbf{Aucun chiffre} issu du modèle de langage n'a
+été reporté sans vérification dans \texttt{results/tables/}.

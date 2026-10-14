@@ -1,0 +1,10 @@
+Variable,Transformation,ADF_stat,ADF_p,KPSS_stat,KPSS_p,ADF stationnaire (p<.05),KPSS stationnaire (p>=.05),Conclusion stationnaire
+Load,brute,-21.696,0.0,1.076,0.01,True,False,False
+Load,d1,-41.473,0.0,0.014,0.1,True,True,True
+Load,d24,-34.671,0.0,0.003,0.1,True,True,True
+Wind,brute,-16.087,0.0,4.237,0.01,True,False,False
+Wind,d1,-37.787,0.0,0.001,0.1,True,True,True
+Wind,d24,-34.342,0.0,0.002,0.1,True,True,True
+Solar,brute,-8.92,0.0,3.719,0.01,True,False,False
+Solar,d1,-43.324,0.0,0.014,0.1,True,True,True
+Solar,d24,-36.2,0.0,0.006,0.1,True,True,True

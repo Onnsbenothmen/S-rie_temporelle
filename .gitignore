@@ -1,0 +1,51 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+dist/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environnements
+.env
+.venv
+venv/
+
+# R
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj.user
+
+# Donnees brutes volumineuses (> limite GitHub de 100 Mo) : non versionnees.
+# Voir README pour le telechargement (Open Power System Data / ENTSO-E).
+data/raw/
+
+# Résultats (à conserver dans le dépôt ? généralement on garde tables/figures mais on peut exclure gros modèles)
+# Modèles Keras/TensorFlow (généralement volumineux) — commenter si besoin de les versionner
+# results/models/*.keras
+
+# Figures temporaires, logs
+tmp_*.txt
+*.log
+Rplots.pdf
+
+# Logs de compilation LaTeX (racine + rapport)
+build*.txt
+pdflatex*.txt
+biber*.txt
+rapport/*.aux
+rapport/*.blg
+rapport/*.out
+rapport/*.toc
+rapport/*.bcf
+rapport/*.run.xml
+rapport/*.bbl
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db

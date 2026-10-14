@@ -1,0 +1,10 @@
+"Variable","Modele","Persistance","Demi_vie","Cov_stationnaire"
+"Load","GARCH(1,1)",0.9981,366.8,TRUE
+"Load","GARCH(2,1)",0.454,0.9,TRUE
+"Load","EGARCH(1,1)",0.6312,1.5,TRUE
+"Wind","GARCH(1,1)",0.9899,68.5,TRUE
+"Wind","GARCH(2,1)",0.9875,55.3,TRUE
+"Wind","EGARCH(1,1)",0.999,675.2,TRUE
+"Solar","GARCH(1,1)",1.005,NA,FALSE
+"Solar","GARCH(2,1)",1.0051,NA,FALSE
+"Solar","EGARCH(1,1)",0.9936,108.3,TRUE

@@ -1,0 +1,60 @@
+\section{Introduction}
+\subsection{Contexte et thématique}
+Le présent mini-projet de séries temporelles porte sur l'analyse et la prévision
+de trois séries horaires du système électrique allemand, mises à disposition
+par la plateforme de transparence \textbf{ENTSO-E} :
+\begin{itemize}
+  \item \texttt{Load} : la consommation électrique nationale (charge nette) ;
+  \item \texttt{Wind} : la production éolienne terrestre et en mer ;
+  \item \texttt{Solar} : la production photovoltaïque.
+\end{itemize}
+Toutes les séries sont exprimées en \textbf{mégawatts (MW)} et couvrent la
+période du \textbf{1\ier{} janvier 2015} au \textbf{30 septembre 2020}, soit
+\(50\,400\) observations à pas horaire, horodatées en \textbf{UTC} (ce qui
+élimine toute ambiguïté liée aux changements d'heure été/hiver).
+
+Le choix de l'énergie se justifie par la richesse structurelle des données :
+forte saisonnalité journalière et hebdomadaire (cycles d'activité humaine pour
+la charge), saisonnalité annuelle et météorologique (éolien et solaire),
+volatilité par grappes (épisodes venteux, journées ensoleillées) et
+interdépendances économiques entre consommation et production renouvelable.
+Ce contexte autorise un spectre complet de méthodes : modèles univariés
+(ARIMA/SARIMA), modèles multivariés dépendant du temps (VAR/VECM),
+modélisation de la volatilité (GARCH) et apprentissage profond (LSTM/GRU).
+
+\subsection{Problématique}
+La transition énergétique allemande (\emph{Energiewende}) fait de l'équilibre
+offre/demande un enjeu critique. Trois questions guident le travail :
+\begin{enumerate}
+  \item Peut-on \textbf{prévoir} ces séries à court (\(h=10\) et \(h=24\)
+        heures), moyen et très long terme (\(h=5\,040\) heures, soit environ
+        \(7\) mois) ?
+  \item Existe-t-il des \textbf{relations dynamiques} (causalité, cointégration)
+        entre consommation et productions renouvelables ?
+  \item Les \textbf{modèles profonds} (LSTM/GRU) surpassent-ils les modèles
+        classiques, et de façon statistiquement significative ?
+\end{enumerate}
+
+\subsection{Objectifs}
+Le travail poursuit quatre objectifs, alignés sur le cahier des charges :
+\begin{enumerate}
+  \item Réaliser le \textbf{socle classique en R} (sections 3.1 ARIMA/SARIMA,
+        3.2 VAR / causalité de Granger / VECM, 3.3 ARCH/GARCH) ;
+  \item \textbf{Transposer} l'intégralité de ce socle en \textbf{Python}, afin
+        de vérifier la reproductibilité des résultats (\emph{double
+        implémentation}) ;
+  \item Étendre l'analyse aux \textbf{modèles profonds LSTM/GRU} en Python ;
+  \item Conduire une \textbf{évaluation comparative} rigoureuse (métriques
+        MSE/RMSE/MAE/MAPE, walk-forward à un pas, test de
+        \textbf{Diebold--Mariano}) et restituer l'ensemble dans un rapport
+        scientifique avec tableaux et figures issus des scripts.
+\end{enumerate}
+
+\subsection{Organisation du rapport}
+La suite est organisée comme suit. La section~\ref{sec:methodo} détaille les
+données, le prétraitement et l'ensemble des méthodologies. La
+section~\ref{sec:resultats} présente les résultats empiriques (analyse
+exploratoire, ARIMA/SARIMA, VAR/VECM, GARCH, LSTM/GRU). La
+section~\ref{sec:evaluation} compare les modèles. La
+section~\ref{sec:conclusion} conclut et discute les limites. Les annexes
+recensent l'ensemble des figures et tableaux produits.
