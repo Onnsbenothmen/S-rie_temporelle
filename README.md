@@ -2,6 +2,8 @@
 
 Analyse et prévision des séries temporelles énergétiques allemandes à fréquence **horaire** : Load (consommation), Wind (éolien), Solar (solaire), en MW. Période 01/01/2015–30/09/2020 (50 400 heures UTC), source ENTSO-E. Rendu 12/10/2026 — socle classique exigé en **R et Python**.
 
+**Dépôt GitHub :** https://github.com/Onnsbenothmen/S-rie_temporelle
+
 ## Arborescence (essentielle)
 - `data/processed/` — données préparées
 - `R/` — scripts R complets (audités/corrigés)

@@ -1,0 +1,20 @@
+# Normalisation des fins de ligne (évite les avertissements CRLF/LF sous Windows)
+* text=auto eol=lf
+
+# Fichiers binaires : aucune conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.keras binary
+*.pptx binary
+*.docx binary
+*.xlsx binary
+*.RData binary
+
+# Notebooks : contenu texte (JSON) en LF
+*.ipynb text eol=lf
+
+# Scripts shell
+*.sh text eol=lf
